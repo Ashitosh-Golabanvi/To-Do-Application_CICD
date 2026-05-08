@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "https://dionce-ai.eastus.cloudapp.azure.com/cicd-todo-api/api/todos/";
+const API = "/cicd-todo-api/api/todos/";
 
 function App() {
   const [todos, setTodos] = useState([]);
