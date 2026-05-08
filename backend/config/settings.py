@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-$)60((zbr4m$@(q+=9&v!119-_el+u)&3ct8u_e&h6c=x#^&h4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["dionce-ai.eastus.cloudapp.azure.com",
+    "localhost",
+    "127.0.0.1"]
 
 
 # Application definition
