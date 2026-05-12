@@ -79,6 +79,6 @@ jobs:
 
             sudo systemctl reload nginx
 
-            echo "DEPLOYMENT SUCCESS"
+            echo "DEPLOYMENT SUCCESS"""
 
           EOF
