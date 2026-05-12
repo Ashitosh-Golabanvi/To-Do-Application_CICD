@@ -13,23 +13,44 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # =========================
+      # SETUP SSH
+      # =========================
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+
+          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+
           chmod 600 ~/.ssh/id_ed25519
 
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
+      # =========================
+      # TEST SSH CONNECTION
+      # =========================
+      - name: Test SSH Connection
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "echo CONNECTED"
+
+      # =========================
+      # DEPLOY APPLICATION
+      # =========================
       - name: Deploy To Azure VM
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
 
             cd ~/temp/cicd_react_django/To-Do-Application_CICD
 
             git pull origin main
 
-            # FRONTEND BUILD
+            # =========================
+            # FRONTEND
+            # =========================
             cd frontend
 
             npm install
@@ -38,7 +59,9 @@ jobs:
             sudo rm -rf /var/www/cicd_react_django_todo/*
             sudo cp -r build/* /var/www/cicd_react_django_todo/
 
+            # =========================
             # BACKEND
+            # =========================
             cd ../backend
 
             source venv/bin/activate
@@ -55,5 +78,7 @@ jobs:
               --daemon
 
             sudo systemctl reload nginx
+
+            echo "DEPLOYMENT SUCCESS"
 
           EOF
