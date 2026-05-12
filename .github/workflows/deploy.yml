@@ -20,8 +20,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
@@ -33,6 +32,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=no \
+            -o IdentitiesOnly=yes \
             ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "echo CONNECTED"
 
       # =========================
@@ -42,15 +42,14 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=no \
+            -o IdentitiesOnly=yes \
             ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
 
             cd ~/temp/cicd_react_django/To-Do-Application_CICD
 
             git pull origin main
 
-            # =========================
             # FRONTEND
-            # =========================
             cd frontend
 
             npm install
@@ -59,9 +58,7 @@ jobs:
             sudo rm -rf /var/www/cicd_react_django_todo/*
             sudo cp -r build/* /var/www/cicd_react_django_todo/
 
-            # =========================
             # BACKEND
-            # =========================
             cd ../backend
 
             source venv/bin/activate
@@ -79,6 +76,6 @@ jobs:
 
             sudo systemctl reload nginx
 
-            echo "DEPLOYMENT SUCCESS"""
+            echo "DEPLOYMENT SUCCESS"
 
           EOF
